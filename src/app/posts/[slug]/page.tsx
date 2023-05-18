@@ -2,7 +2,7 @@ import { client } from "@/libs/apollo";
 import { gql } from "@apollo/client";
 
 type Props = {
-  params: { id: string };
+  params: { slug: string };
 };
 
 export async function generateStaticParams() {
@@ -22,8 +22,8 @@ export async function generateStaticParams() {
 
   const posts = response.data.posts.nodes;
 
-  return posts.map((post: { id: string }) => ({
-    id: post.id,
+  return posts.map((post: { slug: string }) => ({
+    slug: post.slug,
   }));
 }
 
@@ -31,28 +31,23 @@ export default async function Posts({ params }: Props) {
   const postInfo = await client.query({
     query: gql`
       query NewQuery {
-        post(id: "${params.id}") {
+        postBy(slug: "${params.slug}") {
           id
-          title
           content
-          author {
-            node {
-              name
-            }
-          }
+          title
+          date
         }
       }
     `,
   });
 
-  const { title, content, author } = postInfo.data.post;
-  const authorName = author.node.name;
+  const { title, content, date } = postInfo.data.postBy;
 
   return (
     <div className="mx-auto h-screen max-w-2xl px-5 py-10">
       <header className="text-white mb-8">
         <h2 className="text-4xl">
-          {title} <small>por {authorName}</small>
+          {title} <small>por {date}</small>
         </h2>
       </header>
 
