@@ -13,6 +13,7 @@ export async function generateStaticParams() {
           nodes {
             id
             title
+            slug
           }
         }
       }
@@ -48,12 +49,17 @@ export default async function Posts({ params }: Props) {
   const authorName = author.node.name;
 
   return (
-    <div className="text-white">
-      <h2 className="text-4xl">
-        {title} por <small>{authorName}</small>
-      </h2>
+    <div className="mx-auto h-screen max-w-2xl px-5 py-10">
+      <header className="text-white mb-8">
+        <h2 className="text-4xl">
+          {title} <small>por {authorName}</small>
+        </h2>
+      </header>
 
-      <div className="prose">{content}</div>
+      <div
+        className="prose text-white text-justify"
+        dangerouslySetInnerHTML={{ __html: content }}
+      ></div>
     </div>
   );
 }

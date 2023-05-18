@@ -1,40 +1,44 @@
-import { gql } from "@apollo/client";
-import { client } from "@/libs/apollo";
 import { ArticleItem } from "@/components/ArticleItem";
 
 type Post = {
   id: string;
   title: string;
+  slug: string;
 };
 
 export default async function Home() {
-  async function getPosts() {
-    const response = await client.query({
-      query: gql`
-        query NewQuery {
-          posts {
-            nodes {
-              id
-              title
-            }
-          }
-        }
-      `,
-    });
+  const endpoint: string = process.env.WP_API || "";
 
-    return response.data.posts.nodes;
-  }
+  const { data } = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `
+         query NewQuery {
+           posts {
+             nodes {
+               id
+               title
+               slug
+             }
+           }
+         }`,
+    }),
+    next: { revalidate: 2 },
+  }).then((res) => res.json());
 
-  const posts = await getPosts();
+  const posts = data.posts.nodes;
 
   return (
     <div className="mx-auto h-screen max-w-2xl px-5 py-10">
       <h1 className="mb-10 text-4xl text-white">Posts</h1>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         {posts.map((post: Post) => {
-          const { id, title } = post;
-          return <ArticleItem key={id} id={id} title={title} />;
+          const { id, title, slug } = post;
+          return <ArticleItem key={id} id={slug} title={title} />;
         })}
       </div>
     </div>
